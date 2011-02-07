@@ -32,19 +32,52 @@ class RulesEngine {
         return facts
     }
 
+    List testRuleset(RuleSet rules) {
+        def tests = processRuleTests(rules.ruleSet)
+        def dsl = processRules(rules.ruleSet)
+        def fails = []
+        tests.each { testData ->
+            dsl.setProperty('fact', testData.input)
+            dsl.run()
+            testData.expect.each {
+                if (testData.input[it.key] != it.value) {
+                    fails.add("expected '${it.key}' to be '${it.value}' in test data ${testData.input}")
+                }
+            }
+        }
+        return fails
+    }
+
+    static def processRuleTests(String dsl) {
+
+        Script dslScript = new GroovyShell().parse(dsl)
+
+        dslScript.metaClass = createEMC(dslScript.class) {
+            ExpandoMetaClass emc ->
+            emc.tests = []
+            emc.ruleset = { name, Closure ruleset ->
+                ruleset.delegate = new TestRulesetDelegate(tests: tests)
+                ruleset.resolveStrategy = Closure.DELEGATE_FIRST
+                ruleset()
+            }
+        }
+        dslScript.run()
+        return dslScript.tests
+    }
+
     static Script processRules(String dsl) {
 
         Script dslScript = new GroovyShell().parse(dsl)
 
-        dslScript.metaClass = createEMC(dslScript.class, {
+        dslScript.metaClass = createEMC(dslScript.class) {
             ExpandoMetaClass emc ->
             emc.fact = null
-            emc.ruleset = { name, Closure cl ->
-                cl.delegate = new RulesetDelegate(name: name, fact: fact)
-                cl.resolveStrategy = Closure.DELEGATE_FIRST
-                cl()
+            emc.ruleset = { name, Closure ruleset ->
+                ruleset.delegate = new RulesetDelegate(name: name, fact: fact)
+                ruleset.resolveStrategy = Closure.DELEGATE_FIRST
+                ruleset()
             }
-        })
+        }
         return dslScript
     }
 

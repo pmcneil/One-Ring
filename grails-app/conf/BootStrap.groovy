@@ -31,6 +31,10 @@ class BootStrap {
                     fact.incomeTest3 = 'poor bugger'
                 }
             }
+            test(income: 900, expenses: 501) {
+                incomeTest 'passed'
+                nett_income 399
+            }
         }""").save()
     }
     def destroy = {

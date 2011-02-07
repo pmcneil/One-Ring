@@ -41,6 +41,10 @@ class RulesEngineTests extends GrailsUnitTestCase {
                     fact.incomeTest3 = 'poor bugger'
                 }
             }
+
+            test(income: 900, expenses: 501) {
+                incomeTest 'passed'
+            }
         }"""
         def dsl = RulesEngine.processRules(dslScript)
         assert dsl
@@ -73,4 +77,56 @@ class RulesEngineTests extends GrailsUnitTestCase {
         assert fact.error == "Fact income not found. Fact expenses not found."
     }
 
+    void testTestRulesDsl() {
+        mockLogging(RulesEngine, true)
+        mockLogging(RulesetDelegate, true)
+        mockLogging(RuleDelegate, true)
+
+        def ruleSet = new RuleSet(name: "Means Test", ruleSet: """ruleset("Means Test") {
+            require(['income', 'expenses'])
+            rule("nett income") {
+                when {
+                    nett_income = income - expenses
+                    nett_income < 400.00
+                }
+                then {
+                    incomeTest = 'passed'
+                }
+                otherwise {
+                    incomeTest = 'failed'
+                }
+            }
+            test(income: 900, expenses: 500) {
+                incomeTest 'passed'
+            }
+        }""")
+        mockDomain(RuleSet, [ruleSet])
+
+        RulesEngine engine = new RulesEngine()
+        List fails = engine.testRuleset(ruleSet)
+        assert !fails.empty
+        assert fails[0] == "expected 'incomeTest' to be 'passed' in test data [income:900, expenses:500, nett_income:400, incomeTest:failed]"
+
+        ruleSet.ruleSet = """ruleset("Means Test") {
+            require(['income', 'expenses'])
+            rule("nett income") {
+                when {
+                    nett_income = income - expenses
+                    nett_income < 400.00
+                }
+                then {
+                    incomeTest = 'passed'
+                }
+                otherwise {
+                    incomeTest = 'failed'
+                }
+            }
+            test(income: 900, expenses: 501) {
+                incomeTest 'passed'
+                nett_income 399
+            }
+        }"""
+        fails = engine.testRuleset(ruleSet)
+        assert fails.empty
+    }
 }

@@ -7,7 +7,6 @@ package com.nerderg.rules
  */
 class RulesetDelegate {
 
-
     String name
     def fact
     def abort
@@ -28,5 +27,9 @@ class RulesetDelegate {
             println "runing ${this.name} rule $name on $fact"
             abort = cl()
         }
+    }
+
+    def test(Map map, Closure testClosure) {
+        //do nothing
     }
 }

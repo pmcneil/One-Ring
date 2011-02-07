@@ -21,11 +21,17 @@ class RuleSetController {
 
     def save = {
         def ruleSetInstance = new RuleSet(params)
-        if (ruleSetInstance.save(flush: true)) {
+        def engine = new RulesEngine()
+        def testResults = engine.testRuleset(ruleSetInstance)
+
+        if (testResults.empty && ruleSetInstance.save(flush: true)) {
             flash.message = "${message(code: 'default.created.message', args: [message(code: 'ruleSet.label', default: 'RuleSet'), ruleSetInstance.id])}"
             redirect(action: "show", id: ruleSetInstance.id)
         }
         else {
+            if (!testResults.empty) {
+                flash.message = "Tests failed, rules not saved $testResults"
+            }
             render(view: "create", model: [ruleSetInstance: ruleSetInstance])
         }
     }
@@ -65,11 +71,17 @@ class RuleSetController {
                 }
             }
             ruleSetInstance.properties = params
-            if (!ruleSetInstance.hasErrors() && ruleSetInstance.save(flush: true)) {
+            def engine = new RulesEngine()
+            def testResults = engine.testRuleset(ruleSetInstance)
+
+            if (testResults.empty && !ruleSetInstance.hasErrors() && ruleSetInstance.save(flush: true)) {
                 flash.message = "${message(code: 'default.updated.message', args: [message(code: 'ruleSet.label', default: 'RuleSet'), ruleSetInstance.id])}"
                 redirect(action: "show", id: ruleSetInstance.id)
             }
             else {
+                if (!testResults.empty) {
+                    flash.message = "Tests failed, rules not saved $testResults"
+                }
                 render(view: "edit", model: [ruleSetInstance: ruleSetInstance])
             }
         }

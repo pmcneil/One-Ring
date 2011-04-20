@@ -72,9 +72,13 @@ class RuleSetController {
             }
             ruleSetInstance.properties = params
             def engine = new RulesEngine()
-            def testResults = engine.testRuleset(ruleSetInstance)
-
-            if (testResults.empty && !ruleSetInstance.hasErrors() && ruleSetInstance.save(flush: true)) {
+            def testResults
+            try {
+                testResults = engine.testRuleset(ruleSetInstance)
+            } catch (e) {
+                testResults = [e.message]
+            }
+            if (testResults?.empty && !ruleSetInstance.hasErrors() && ruleSetInstance.save(flush: true)) {
                 flash.message = "${message(code: 'default.updated.message', args: [message(code: 'ruleSet.label', default: 'RuleSet'), ruleSetInstance.id])}"
                 redirect(action: "show", id: ruleSetInstance.id)
             }

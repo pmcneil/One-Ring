@@ -1,107 +1,116 @@
 <html>
 <head>
-  <title>Welcome to Grails</title>
-  <meta name="layout" content="main"/>
-  <style type="text/css" media="screen">
+    <title>One Ring</title>
+    <meta name="layout" content="main"/>
 
-  #nav {
-    margin-top: 20px;
-    margin-left: 30px;
-    width: 228px;
-    float: left;
-
-  }
-
-  .homePagePanel * {
-    margin: 0px;
-  }
-
-  .homePagePanel .panelBody ul {
-    list-style-type: none;
-    margin-bottom: 10px;
-  }
-
-  .homePagePanel .panelBody h1 {
-    text-transform: uppercase;
-    font-size: 1.1em;
-    margin-bottom: 10px;
-  }
-
-  .homePagePanel .panelBody {
-    background: url(images/leftnav_midstretch.png) repeat-y top;
-    margin: 0px;
-    padding: 15px;
-  }
-
-  .homePagePanel .panelBtm {
-    background: url(images/leftnav_btm.png) no-repeat top;
-    height: 20px;
-    margin: 0px;
-  }
-
-  .homePagePanel .panelTop {
-    background: url(images/leftnav_top.png) no-repeat top;
-    height: 11px;
-    margin: 0px;
-  }
-
-  h2 {
-    margin-top: 15px;
-    margin-bottom: 15px;
-    font-size: 1.2em;
-  }
-
-  #pageBody {
-    margin-left: 280px;
-    margin-right: 20px;
-  }
-  </style>
 </head>
 <body>
-<div id="nav">
-  <div class="homePagePanel">
-    <div class="panelTop"></div>
-    <div class="panelBody">
-      <h1>Application Status</h1>
-      <ul>
-        <li>App version: <g:meta name="app.version"></g:meta></li>
-        <li>Grails version: <g:meta name="app.grails.version"></g:meta></li>
-        <li>Groovy version: ${org.codehaus.groovy.runtime.InvokerHelper.getVersion()}</li>
-        <li>JVM version: ${System.getProperty('java.version')}</li>
-        <li>Controllers: ${grailsApplication.controllerClasses.size()}</li>
-        <li>Domains: ${grailsApplication.domainClasses.size()}</li>
-        <li>Services: ${grailsApplication.serviceClasses.size()}</li>
-        <li>Tag Libraries: ${grailsApplication.tagLibClasses.size()}</li>
-      </ul>
-      <h1>Installed Plugins</h1>
-      <ul>
-        <g:set var="pluginManager"
-                value="${applicationContext.getBean('pluginManager')}"></g:set>
-
-        <g:each var="plugin" in="${pluginManager.allPlugins}">
-          <li>${plugin.name} - ${plugin.version}</li>
-        </g:each>
-
-      </ul>
-    </div>
-    <div class="panelBtm"></div>
-  </div>
+<div class="nav">
+    <span class="menuButton"><a href="${g.createLink(controller: 'ruleSet', action: 'index')}">Edit Rules</a></span>
+    <span class="menuButton"><a href="${g.resource(dir: 'rest/applyRules')}">REST</a></span>
+    <span class="menuButton"><a href="${g.resource(dir: 'services')}">SOAP</a></span>
 </div>
-<div id="pageBody">
-  <h1>Welcome to Grails</h1>
-  <p>Congratulations, you have successfully started your first Grails application! At the moment
-  this is the default page, feel free to modify it to either redirect to a controller or display whatever
-  content you may choose. Below is a list of controllers that are currently deployed in this application,
-  click on each to execute its default action:</p>
-
-  <div id="controllerList" class="dialog">
-    <h2>Available Controllers:</h2>
+<div id="pageBody" class="body">
+    <h1>One Ring - Scripting Rules Engine Service</h1>
+    <p>
+        One Ring isn't like other &quot;Rules Engines&quot;, it's meant to be used as a web service for multiple applications
+        to gain access to scripted processing of arbitrary parameters.
+    </p>
+    <p>
+        It centralises storage and processing of common rules (or business rules) for multiple applications that need
+        access to the same rules. Rules are defined using a simple language understandable by domain experts.
+    </p>
+    <p>
+        One Ring is aimed at continuous processing for multiple small applications, not batch processing of billions of
+        entities. It is very light weight and is deployed as a WAR inside a container like Tomcat. For processing purposes
+        there is no reason why you can't have multiple One Ring servers running from the same Database.
+    </p>
+    <p>
+        It has not been optimised for speed, but it's not exactly slow.
+    </p>
+    <h1>Features</h1>
     <ul>
-      <g:each var="c" in="${grailsApplication.controllerClasses.sort { it.fullName } }">
-        <li class="controller"><g:link controller="${c.logicalPropertyName}">${c.fullName}</g:link></li>
-      </g:each>
+        <li>A friendly to quite a few humans DSL</li>
+        <li>REST and SOAP interfaces</li>
+        <li>JSON and XML fact encoding</li>
+        <li>Inbuilt rule testing in the rule set</li>
+        <li>Script rules in simplified or not so simplified Groovy</li>
+        <li>Keepin' it simple</li>
     </ul>
-  </div>
+    <h1>REST</h1>
+    <p>
+        Get started using the RESTful interface by pointing your app (a browser will do) at <a href="${g.resource(dir: 'rest/applyRules')}">${g.resource(dir: 'rest/applyRules')}</a>
+        and add a couple of parameters like:
+    </p>
+    <ul>
+        <li>ruleSet=Means Test</li>
+        <li>income=900</li>
+        <li>expenses=400</li>
+    </ul>
+    <br/>
+    <p>->
+        <a href="${createLink(uri: '/rest/applyRules')}?ruleSet=Means Test&facts=[{income:900,expenses:400}]">
+            ${createLink(uri: '/rest/applyRules')}?ruleSet=Means Test&facts=[{income:900,expenses:400}]
+        </a>
+    </p>
+    <p>
+        You can GET or POST your facts to the rules engine as JSON, and it will return a JSON map/object of the results.
+    </p>
+    <p>
+        If you're a masochist you can post the facts as (encoded) XML and get XML results. e.g.
+    <div class="code">
+        &lt;list&gt;
+        &lt;map&gt;
+        &lt;entry key="income"&gt;900&lt;/entry&gt;
+        &lt;entry key="expenses"&gt;400&lt;/entry&gt;
+        &lt;/map&gt;
+        &lt;/list&gt;
+    </div>
+</p>
+    <p>->
+        <a href="/rulesEngine/rest/applyRules?ruleSet=Means%20Test&facts=%20%3Clist%3E%3Cmap%3E%3Centry%20key=%22income%22%3E900%3C/entry%3E%3Centry%20key=%22expenses%22%3E300%3C/entry%3E%3C/map%3E%3C/list%3E">
+            /rulesEngine/rest/applyRules?ruleSet=Means%20Test&facts=%20%3Clist%3E%3Cmap%3E%3Centry%20key=%22income%22%3E900%3C/entry%3E%3Centry%20key=%22expenses%22%3E400%3C/entry%3E%3C/map%3E%3C/list%3E
+        </a>
+    </p>
+
+    <h1>SOAP</h1>
+    <p>
+        Get started with the SOAP interface by pointing your browser at <a href="${g.resource(dir: 'services')}">${g.resource(dir: 'services')}</a> then take in the WSDL.
+    </p>
+    <p>
+        You can use JSON or XML encoded facts, JSON:
+    <div class="code">
+        &lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:rul="http://rules.nerderg.com/"&gt;
+        &lt;soapenv:Header/&gt;
+        &lt;soapenv:Body&gt;
+        &lt;rul:applyRules&gt;
+        &lt;rul:ruleSet&gt;Means Test&lt;/rul:ruleSet&gt;
+        &lt;rul:facts&gt;[{income: 900, expenses: 600}, {income:900, expenses: 300}]&lt;/rul:facts&gt;
+        &lt;/rul:applyRules&gt;
+        &lt;/soapenv:Body&gt;
+        &lt;/soapenv:Envelope&gt;
+    </div>
+    Note the XML escapery going on here for the XML encoded facts:
+    <div class="code">
+        &lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:rul="http://rules.nerderg.com/"&gt;
+        &lt;soapenv:Header/&gt;
+        &lt;soapenv:Body&gt;
+        &lt;rul:applyRules&gt;
+        &lt;rul:ruleSet&gt;Means Test&lt;/rul:ruleSet&gt;
+        &lt;rul:facts&gt;&lt;![CDATA[
+        &lt;list&gt;
+        &lt;map&gt;
+        &lt;entry key="income"&gt;900&lt;/entry&gt;
+        &lt;entry key="expenses"&gt;300&lt;/entry&gt;
+        &lt;/map&gt;
+        &lt;/list&gt;
+        ]]&gt;&lt;/rul:facts&gt;
+        &lt;/rul:applyRules&gt;
+        &lt;/soapenv:Body&gt;
+        &lt;/soapenv:Envelope&gt;
+    </div>
+</p>
+
 </div>
 </body>
 </html>

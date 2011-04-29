@@ -1,0 +1,33 @@
+One Ring - Scripting Rules Engine Service
+
+    One Ring isn't like other "Rules Engines", it's meant to be used as a web service for multiple applications
+    to gain access to scripted processing of arbitrary parameters.
+
+    It centralises storage and processing of common rules (or business rules) for multiple applications that need
+    access to the same rules. Rules are defined using a simple language understandable by domain experts.
+
+    One Ring is aimed at continuous processing for multiple small applications, not batch processing of billions of
+    entities. It is very light weight and is deployed as a WAR inside a container like Tomcat. For processing purposes
+    there is no reason why you can't have multiple One Ring servers running from the same Database.
+
+    It has not been optimised for speed, it's not fast but it's not exactly slow.
+
+Features
+
+    * A friendly to quite a few humans DSL
+    * REST and SOAP interfaces
+    * JSON and XML fact encoding
+    * Inbuilt rule testing in the rule set
+    * Script rules in simplified or not so simplified Groovy
+    * Keepin' it simple
+
+One Ring is Copyright 2010, 2011 Peter McNeil. It was developed in association with Legal Aid Commission (ACT) as
+part of their eGrants project. Legal Aid Commission (ACT) has graciously allowed me to open source this code under
+the Apache 2.0 License.
+
+One Ring is Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+language governing permissions and limitations under the License.

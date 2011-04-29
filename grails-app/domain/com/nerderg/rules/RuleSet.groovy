@@ -6,5 +6,6 @@ class RuleSet {
     String ruleSet
 
     static constraints = {
+        name(unique: true)
     }
 }

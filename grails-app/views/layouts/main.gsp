@@ -13,5 +13,10 @@
 </div>
 <div id="head"><a href="${createLink(uri: '/')}"><img class="logo" src="${resource(dir: 'images', file: 'oneRingLogo.png')}" alt="One Ring" border="0"/></a></div>
 <g:layoutBody/>
+<div id="ft">
+    <hr/>
+    Copyright &copy; nerdErg 2011 : version <g:meta name="app.version"/> Apache 2.0 License
+</div>
+
 </body>
 </html>

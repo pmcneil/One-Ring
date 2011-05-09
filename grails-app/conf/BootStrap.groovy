@@ -17,7 +17,9 @@ import com.nerderg.rules.RuleSet
 class BootStrap {
 
     def init = { servletContext ->
-        new RuleSet(name: "Means Test", ruleSet: """ruleset("Means Test") {
+        def rs = RuleSet.findByName("Means Test")
+        if (!rs) {
+            new RuleSet(name: "Means Test", ruleSet: """ruleset("Means Test") {
     require(['income', 'expenses'])
     rule("nett income") {
         when {
@@ -51,8 +53,8 @@ class BootStrap {
         nett_income 399
     }
 }""").save()
-        new RuleSet(name: "Questions",
-                ruleSet: """ruleset("Questions") {
+            new RuleSet(name: "Questions",
+                    ruleSet: """ruleset("Questions") {
 
     require(['code'])
 
@@ -67,6 +69,7 @@ class BootStrap {
     test(code: '428607') {question null}
 }
 """).save()
+        }
     }
     def destroy = {
     }

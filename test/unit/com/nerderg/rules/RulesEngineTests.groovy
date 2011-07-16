@@ -141,5 +141,36 @@ class RulesEngineTests extends GrailsUnitTestCase {
         }"""
         fails = engine.testRuleset(ruleSet)
         assert fails.empty
+
+        ruleSet.ruleSet = """
+        ruleset('test') {
+
+            require(['value'])
+
+            rule('quantity within range') {
+
+                when {
+                    value < 1 || value > 10
+                }
+
+                then {
+                    failed = true
+                    message = ["invalid quantity"]
+                }
+
+                otherwise {
+                    failed = false
+                    message = []
+                }
+
+            }
+            test(value: 0) {
+                failed true
+                message (["invalid quantity"])
+            }
+        }
+        """
+        fails = engine.testRuleset(ruleSet)
+        assert fails.empty
     }
 }

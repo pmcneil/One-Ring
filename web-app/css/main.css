@@ -17,6 +17,12 @@ html * {
 
 /* GENERAL */
 
+#editor {
+    position: relative;
+    width: 80em;
+    height: 40em;
+}
+
 .spinner {
     padding: 5px;
     position: absolute;

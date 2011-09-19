@@ -32,66 +32,53 @@ class RulesEngine {
      * @param facts - a list of fact maps
      * @return facts as modified by the rules
      */
-    def process(String ruleSet, facts) {
-        def rules = RuleSet.findByName(ruleSet)
-        if (!rules) {
-            throw new MissingRulesetException("Ruleset $ruleSet not found")
-        }
-        def dsl = processRules(rules.ruleSet)
+    static List<Map> process(RulesetDelegate ruleSet, List<Map> facts) {
         facts.each { fact ->
-            dsl.setProperty('fact', fact)
-            dsl.run()
+            ruleSet.runRules(fact)
         }
         return facts
     }
 
-    List testRuleset(RuleSet rules) {
-        def tests = processRuleTests(rules.ruleSet)
-        def dsl = processRules(rules.ruleSet)
+    static List testRuleset(RulesetDelegate rules) {
         def fails = []
-        tests.each { testData ->
-            dsl.setProperty('fact', testData.input)
-            dsl.run()
-            testData.expect.each {
-                if (testData.input[it.key] != it.value) {
-                    fails.add("expected '${it.key}' to be '${it.value}' in test data ${testData.input}")
+        rules.tests.each { testData ->
+            if (rules.checkRequired(testData.input)) {
+                rules.runRules(testData.input)
+                testData.expect.each {
+                    if (testData.input[it.key] != it.value) {
+                        fails.add("expected '${it.key}' to be '${it.value}' in test data ${testData.input}")
+                    }
                 }
+            } else {
+                fails.add(testData.input.error)
             }
         }
         return fails
     }
 
-    static def processRuleTests(String dsl) {
+    static List<RulesetDelegate> processRules(String dsl) {
+        return processRuleScript(new GroovyShell().parse(dsl))
+    }
 
-        Script dslScript = new GroovyShell().parse(dsl)
+    static List<RulesetDelegate> processRules(File file) {
+        return processRuleScript( new GroovyShell().parse(file))
+    }
+
+    static List<RulesetDelegate> processRuleScript(Script dslScript) {
 
         dslScript.metaClass = createEMC(dslScript.class) {
             ExpandoMetaClass emc ->
-            emc.tests = []
+            emc.fact = null
+            emc.rulesets = []
             emc.ruleset = { name, Closure ruleset ->
-                ruleset.delegate = new TestRulesetDelegate(tests: tests)
+                ruleset.delegate = new RulesetDelegate(name: name)
+                rulesets.add(ruleset.delegate)
                 ruleset.resolveStrategy = Closure.DELEGATE_FIRST
                 ruleset()
             }
         }
         dslScript.run()
-        return dslScript.tests
-    }
-
-    static Script processRules(String dsl) {
-
-        Script dslScript = new GroovyShell().parse(dsl)
-
-        dslScript.metaClass = createEMC(dslScript.class) {
-            ExpandoMetaClass emc ->
-            emc.fact = null
-            emc.ruleset = { name, Closure ruleset ->
-                ruleset.delegate = new RulesetDelegate(name: name, fact: fact)
-                ruleset.resolveStrategy = Closure.DELEGATE_FIRST
-                ruleset()
-            }
-        }
-        return dslScript
+        return dslScript.rulesets
     }
 
     static ExpandoMetaClass createEMC(Class clazz, Closure cl) {

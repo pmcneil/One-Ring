@@ -1,0 +1,11 @@
+ruleset("milkshake") {
+    require(["singer"])
+    rule("singer is Kelis") {
+        when { singer =~ /(?i)Kelis/ }
+        then { boys = 'In the yard' }
+        otherwise { boys = 'not in the yard' }
+    }
+    test(singer: 'Kelis') { boys 'In the yard' }
+    test(singer: 'kElis') { boys 'In the yard' }
+    test(singer: 'Snoop Dog') { boys 'not in the yard' }
+}

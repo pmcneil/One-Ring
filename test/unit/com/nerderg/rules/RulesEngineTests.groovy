@@ -21,11 +21,75 @@ import grails.test.*
  *
  */
 class RulesEngineTests extends GrailsUnitTestCase {
-
-    void testProcessRulesDsl() {
+    @Override
+    protected void setUp() {
+        super.setUp()
         mockLogging(RulesEngine, true)
         mockLogging(RulesetDelegate, true)
         mockLogging(RuleDelegate, true)
+    }
+
+
+    void testProcessRulesScript() {
+        List<RulesetDelegate> ruleSets = RulesEngine.processRules(rule)
+        assert ruleSets.size() == 2
+        assert ruleSets[0].name == "Means Test"
+        assert ruleSets[0].rules.size() == 3
+        assert ruleSets[0].required == ['income', 'expenses']
+        assert ruleSets[0].tests == [[input: [income: 900, expenses: 501], expect: [incomeTest: 'passed', nett_income: 399]]]
+        ruleSets.each { ruleSet ->
+            List fails = RulesEngine.testRuleset(ruleSet)
+            assert fails.isEmpty()
+        }
+    }
+
+    private String rule = """ ruleset("Means Test") {
+    require(['income', 'expenses'])
+    rule("nett income") {
+        when {
+            nett_income = income - expenses
+            nett_income < 400.00
+        }
+        then {
+            incomeTest = 'passed'
+        }
+        otherwise {
+            incomeTest = 'failed'
+        }
+    }
+
+    rule("nett income2") {
+        evaluate {
+            incomeTest2 = nett_income < 400.00
+        }
+    }
+
+    rule("nett income3") {
+        if(fact.nett_income > 400) {
+            fact.incomeTest3 = 'rich bugger'
+        } else {
+            fact.incomeTest3 = 'poor bugger'
+        }
+    }
+
+    test(income: 900, expenses: 501) {
+        incomeTest 'passed'
+        nett_income 399
+    }
+}
+ruleset("milkshake") {
+    require(["singer"])
+    rule("singer is Kelis") {
+        when { singer =~ /(?i)Kelis/ }
+        then { boys = 'In the yard' }
+        otherwise { boys = 'not in the yard' }
+    }
+    test(singer: 'Kelis') { boys 'In the yard' }
+    test(singer: 'kElis') { boys 'In the yard' }
+    test(singer: 'Snoop Dog') { boys 'not in the yard' }
+} """
+
+    void testRunRules() {
         def dslScript = """ruleset("Means Test") {
             require(['income', 'expenses'])
             rule("nett income") {
@@ -59,35 +123,120 @@ class RulesEngineTests extends GrailsUnitTestCase {
                 incomeTest 'passed'
             }
         }"""
-        def dsl = RulesEngine.processRules(dslScript)
-        assert dsl
+
+        List<RulesetDelegate> ruleSets = RulesEngine.processRules(dslScript)
+        assert ruleSets
+        assert ruleSets.size() == 1
+
+        RulesetDelegate ruleSet = ruleSets[0]
+        assert !ruleSet.abortOnFail
+
         def fact = [income: 900, expenses: 600]
-        dsl.setProperty('fact', fact)
-        dsl.run()
+
+        long start = System.currentTimeMillis()
+        ruleSet.runRules(fact)
+        println "Rules run in " + (System.currentTimeMillis() - start) + "ms"
+
         assert fact.nett_income == 300
         assert fact.incomeTest == 'passed'
         assert fact.incomeTest2
         assert fact.incomeTest3 == 'poor bugger'
-        fact.expenses = 400
-        fact.remove('nett_income')
-        fact.remove('incomeTest')
-        dsl.run()
+
+        fact = [income: 900, expenses: 400]
+
+        start = System.currentTimeMillis()
+        ruleSet.runRules(fact)
+        println "Rules run in " + (System.currentTimeMillis() - start) + "ms"
+
         assert fact.nett_income == 500
         assert fact.incomeTest == 'failed'
         assert !fact.incomeTest2
         assert fact.incomeTest3 == 'rich bugger'
+
         fact = [expenses: 900]
-        dsl.setProperty('fact', fact)
-        dsl.run()
+
+        start = System.currentTimeMillis()
+        ruleSet.runRules(fact)
+        println "Rules run in " + (System.currentTimeMillis() - start) + "ms"
+
         println fact
         assert fact.error
         assert fact.error == "Fact income not found."
+
         fact = [:]
-        dsl.setProperty('fact', fact)
-        dsl.run()
+
+        start = System.currentTimeMillis()
+        ruleSet.runRules(fact)
+        println "Rules run in " + (System.currentTimeMillis() - start) + "ms"
+
         println fact
         assert fact.error
         assert fact.error == "Fact income not found. Fact expenses not found."
+    }
+
+    void testRunRulesAbortOnFail() {
+        def dslScript = """ruleset("Means Test") {
+            require(['income', 'expenses'])
+
+            abortOnFail = true
+
+            rule("nett income") {
+                when {
+                    nett_income = income - expenses
+                    nett_income < 400.00
+                }
+                then {
+                    incomeTest = 'passed'
+                }
+                otherwise {
+                    incomeTest = 'failed'
+                }
+            }
+
+            rule("nett income2") {
+                evaluate {
+                    incomeTest2 = nett_income < 400.00
+                }
+            }
+
+            rule("nett income3") {
+                if(fact.nett_income > 400) {
+                    fact.incomeTest3 = 'rich bugger'
+                } else {
+                    fact.incomeTest3 = 'poor bugger'
+                }
+            }
+
+            test(income: 900, expenses: 501) {
+                incomeTest 'passed'
+            }
+        }"""
+
+        List<RulesetDelegate> ruleSets = RulesEngine.processRules(dslScript)
+        assert ruleSets
+        assert ruleSets.size() == 1
+
+        RulesetDelegate ruleSet = ruleSets[0]
+        assert ruleSet
+        assert ruleSet.abortOnFail
+
+        def fact = [income: 900, expenses: 600]
+
+        ruleSet.runRules(fact)
+
+        assert fact.nett_income == 300
+        assert fact.incomeTest == 'passed'
+        assert fact.incomeTest2
+        assert fact.incomeTest3 == 'poor bugger'
+
+        fact = [income: 900, expenses: 400]
+
+        ruleSet.runRules(fact)
+
+        assert fact.nett_income == 500
+        assert fact.incomeTest == 'failed'
+        assert !fact.containsKey('incomeTest2')
+        assert !fact.containsKey('incomeTest3')
     }
 
     void testTestRulesDsl() {
@@ -95,7 +244,7 @@ class RulesEngineTests extends GrailsUnitTestCase {
         mockLogging(RulesetDelegate, true)
         mockLogging(RuleDelegate, true)
 
-        def ruleSet = new RuleSet(name: "Means Test", ruleSet: """ruleset("Means Test") {
+        String ruleDsl = """ruleset("Means Test") {
             require(['income', 'expenses'])
             rule("nett income") {
                 when {
@@ -112,15 +261,19 @@ class RulesEngineTests extends GrailsUnitTestCase {
             test(income: 900, expenses: 500) {
                 incomeTest 'passed'
             }
-        }""")
-        mockDomain(RuleSet, [ruleSet])
+        }"""
 
-        RulesEngine engine = new RulesEngine()
-        List fails = engine.testRuleset(ruleSet)
+        List<RulesetDelegate> ruleSets = RulesEngine.processRules(ruleDsl)
+        assert ruleSets
+        assert ruleSets.size() == 1
+
+        RulesetDelegate ruleSet = ruleSets[0]
+
+        List fails = RulesEngine.testRuleset(ruleSet)
         assert !fails.empty
         assert fails[0] == "expected 'incomeTest' to be 'passed' in test data [income:900, expenses:500, nett_income:400, incomeTest:failed]"
 
-        ruleSet.ruleSet = """ruleset("Means Test") {
+        ruleDsl = """ruleset("Means Test") {
             require(['income', 'expenses'])
             rule("nett income") {
                 when {
@@ -139,10 +292,16 @@ class RulesEngineTests extends GrailsUnitTestCase {
                 nett_income 399
             }
         }"""
-        fails = engine.testRuleset(ruleSet)
+
+        ruleSets = RulesEngine.processRules(ruleDsl)
+        assert ruleSets
+        assert ruleSets.size() == 1
+        ruleSet = ruleSets[0]
+
+        fails = RulesEngine.testRuleset(ruleSet)
         assert fails.empty
 
-        ruleSet.ruleSet = """
+        ruleDsl = """
         ruleset('test') {
 
             require(['value'])
@@ -170,7 +329,65 @@ class RulesEngineTests extends GrailsUnitTestCase {
             }
         }
         """
-        fails = engine.testRuleset(ruleSet)
+        ruleSets = RulesEngine.processRules(ruleDsl)
+        assert ruleSets
+        assert ruleSets.size() == 1
+        ruleSet = ruleSets[0]
+
+        fails = RulesEngine.testRuleset(ruleSet)
         assert fails.empty
+    }
+
+
+    void testBenchmarkRunRules() {
+        def dslScript = """ruleset("Means Test") {
+            require(['income', 'expenses'])
+            rule("nett income") {
+                when {
+                    nett_income = income - expenses
+                    nett_income < 400.00
+                }
+                then {
+                    incomeTest = 'passed'
+                }
+                otherwise {
+                    incomeTest = 'failed'
+                }
+            }
+
+            rule("nett income2") {
+                evaluate {
+                    incomeTest2 = nett_income < 400.00
+                }
+            }
+
+            rule("nett income3") {
+                if(fact.nett_income > 400) {
+                    fact.incomeTest3 = 'rich bugger'
+                } else {
+                    fact.incomeTest3 = 'poor bugger'
+                }
+            }
+
+            test(income: 900, expenses: 501) {
+                incomeTest 'passed'
+            }
+        }"""
+
+        List<RulesetDelegate> ruleSets = RulesEngine.processRules(dslScript)
+        assert ruleSets
+        assert ruleSets.size() == 1
+
+        RulesetDelegate ruleSet = ruleSets[0]
+        assert ruleSet
+        assert !ruleSet.abortOnFail
+
+        def fact = [income: 900, expenses: 600]
+
+        long start = System.currentTimeMillis()
+        1000.times {
+            ruleSet.runRules(fact)
+        }
+        println "Rules run 1000 times in avg " + (System.currentTimeMillis() - start)/1000 + "ms each"
     }
 }

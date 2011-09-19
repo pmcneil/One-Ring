@@ -15,115 +15,68 @@ package com.nerderg.rules
 
 class RuleSetController {
 
-    static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
+    def ruleSetService
 
     def index = {
         redirect(action: "list", params: params)
     }
 
+    /**
+     * list the currently loaded rulesets
+     */
     def list = {
-        params.max = Math.min(params.max ? params.int('max') : 10, 100)
-        [ruleSetInstanceList: RuleSet.list(params), ruleSetInstanceTotal: RuleSet.count()]
+        List ruleSets = ruleSetService.getRuleSetNames().sort { a, b -> a <=> b}
+        params.max = Math.min(params.max ? params.long('max') : 10l, 100l)
+        params.offset = params.offset ? params.long('offset') : 0l
+        List subList = limit(ruleSets, params.max, params.offset)
+        [ruleSetList: subList, ruleSetTotal: ruleSets.size()]
     }
 
-    def create = {
-        def ruleSetInstance = new RuleSet()
-        ruleSetInstance.properties = params
-        return [ruleSetInstance: ruleSetInstance]
-    }
-
-    def save = {
-        def ruleSetInstance = new RuleSet(params)
-        def engine = new RulesEngine()
-        def testResults = engine.testRuleset(ruleSetInstance)
-
-        if (testResults.empty && ruleSetInstance.save(flush: true)) {
-            flash.message = "${message(code: 'default.created.message', args: [message(code: 'ruleSet.label', default: 'RuleSet'), ruleSetInstance.id])}"
-            redirect(action: "show", id: ruleSetInstance.id)
-        }
-        else {
-            if (!testResults.empty) {
-                flash.message = "Tests failed, rules not saved $testResults"
-            }
-            render(view: "create", model: [ruleSetInstance: ruleSetInstance])
-        }
-    }
-
-    def show = {
-        def ruleSetInstance = RuleSet.get(params.id)
-        if (ruleSetInstance) {
-            [ruleSetInstance: ruleSetInstance]
-        }
-        else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'ruleSet.label', default: 'RuleSet'), params.id])}"
-            redirect(action: "list")
-        }
-    }
-
-    def edit = {
-        def ruleSetInstance = RuleSet.get(params.id)
-        if (ruleSetInstance) {
-            return [ruleSetInstance: ruleSetInstance]
-        }
-        else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'ruleSet.label', default: 'RuleSet'), params.id])}"
-            redirect(action: "list")
-        }
-    }
-
+    /**
+     * read the rulesets from the file system pre process and store in memory. If any ruleset does not pass the tests the entire update is abandoned.
+     */
     def update = {
-        def ruleSetInstance = RuleSet.get(params.id)
-        if (ruleSetInstance) {
-            if (params.version) {
-                def version = params.version.toLong()
-                if (ruleSetInstance.version > version) {
-
-                    ruleSetInstance.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'ruleSet.label', default: 'RuleSet')] as Object[], "Another user has updated this RuleSet while you were editing")
-                    render(view: "edit", model: [ruleSetInstance: ruleSetInstance])
-                    return
-                }
-            }
-            ruleSetInstance.properties = params
-            def engine = new RulesEngine()
-            def testResults
-            try {
-                testResults = engine.testRuleset(ruleSetInstance)
-            } catch (e) {
-                testResults = [e.message]
-            }
-            if (testResults?.empty && !ruleSetInstance.hasErrors() && ruleSetInstance.save(flush: true)) {
-                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'ruleSet.label', default: 'RuleSet'), ruleSetInstance.id])}"
-                redirect(action: "show", id: ruleSetInstance.id)
-            }
-            else {
-                if (!testResults.empty) {
-                    flash.message = "Tests failed, rules not saved $testResults"
-                }
-                render(view: "edit", model: [ruleSetInstance: ruleSetInstance])
-            }
-        }
-        else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'ruleSet.label', default: 'RuleSet'), params.id])}"
-            redirect(action: "list")
+        try {
+            ruleSetService.update()
+            flash.message = "Ruleset updated"
+            redirect(action: 'list')
+        } catch (e) {
+            flash.message = "Ruleset update failed. Rules have <b>not</b> been updated."
+            flash.error = e.message
+            redirect(action: 'list')
         }
     }
 
-    def delete = {
-        def ruleSetInstance = RuleSet.get(params.id)
-        if (ruleSetInstance) {
-            try {
-                ruleSetInstance.delete(flush: true)
-                flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'ruleSet.label', default: 'RuleSet'), params.id])}"
-                redirect(action: "list")
-            }
-            catch (org.springframework.dao.DataIntegrityViolationException e) {
-                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'ruleSet.label', default: 'RuleSet'), params.id])}"
-                redirect(action: "show", id: params.id)
-            }
+    /**
+     * This does an SQL style offest limit on a list, returning the remaining elements in a list after the <em>offset</em> up to the <em>limit</em> of elements
+     * if the offset is > the number of elements in the list and empty list is returned
+     * todo move to a utility class
+     * @param list the list that you need a subset of
+     * @param limit the maximum number of elements to return
+     * @param offset offset into the list
+     * @return a list with a maximum of limit elements offset into the list.
+     */
+    private List limit(List list, long limit, long offset) {
+        if(limit == 0) {
+            throw new IllegalArgumentException("Limit has to be greater than zero")
         }
-        else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'ruleSet.label', default: 'RuleSet'), params.id])}"
-            redirect(action: "list")
+
+        long maxIndex = Math.max((list.size() - 1), 0)
+        if (maxIndex == 0) {
+            return list
         }
+
+        if (offset > maxIndex) {
+            return []
+        }
+
+        long top = Math.min((offset + (limit - 1)), maxIndex)
+
+        log.debug "offset $offset, top $top"
+        if (top == 0) {
+            return list
+        }
+
+        return list[offset..top]
     }
 }

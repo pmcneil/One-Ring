@@ -21,28 +21,56 @@ package com.nerderg.rules
 class RulesetDelegate {
 
     String name
-    def fact
-    def abort
+    List<Closure> rules = []
+    List required = []
+    List tests = []
+    boolean abortOnFail = false
 
     def require(List params) {
-        params.each {
+        required = params
+    }
+
+    boolean checkRequired(Map fact) {
+        boolean ok = true
+        required.each {
             if (fact[it] == null) {
-                abort = 'abort'
+                ok = false
                 fact.error = (fact.error ? "${fact.error} " : "") + "Fact $it not found."
             }
         }
+        return ok
     }
 
     def rule(String name, Closure cl) {
-        if ('abort' != abort) {
-            cl.delegate = new RuleDelegate(name: name, fact: fact)
-            cl.resolveStrategy = Closure.DELEGATE_FIRST
-            println "runing ${this.name} rule $name on $fact"
-            abort = cl()
+        cl.delegate = new RuleDelegate(name: name)
+        cl.resolveStrategy = Closure.DELEGATE_FIRST
+//        println "ruleSet ${this.name} rule $name created"
+        rules.add(cl)
+    }
+
+    boolean runRules(Map fact) {
+        if (checkRequired(fact)) {
+            for (Closure ruleClosure in rules) {
+                ruleClosure.fact = fact
+                ruleClosure()
+                if (!(ruleClosure.result) && abortOnFail) {
+                    return false
+                }
+            }
+        } else {
+            return false
         }
+        return true
     }
 
     def test(Map map, Closure testClosure) {
-        //do nothing
+        Map expect = [:]
+        tests.add([input: map, expect: expect])
+        def delegate = new TestDelegate()
+        delegate.metaClass.methodMissing = {String methodName, args ->
+            expect.put(methodName, args[0])
+        }
+        testClosure.delegate = delegate
+        testClosure()
     }
 }

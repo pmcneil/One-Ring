@@ -10,6 +10,22 @@
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
 
+def ENV_NAME = "ONE_RING_CONFIG"
+
+if (!grails.config.locations || !(grails.config.locations instanceof List)) {
+    grails.config.locations = []
+}
+
+if (System.getProperty(ENV_NAME)) {
+    println "Including configuration file specified on command line: " + System.getProperty(ENV_NAME);
+    grails.config.locations << "file:" + System.getProperty(ENV_NAME)
+} else if (System.getenv(ENV_NAME)) {
+    println "Including configuration file specified in environment: " + System.getenv(ENV_NAME);
+    grails.config.locations << "file:" + System.getenv(ENV_NAME)
+} else  {
+    println "No external configuration file defined."
+}
+
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
@@ -52,13 +68,16 @@ grails.spring.bean.packages = []
 
 grails.gorm.failOnError = true
 
+
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
-        grails.serverURL = "http://www.changeme.com"
+        grails.serverURL = "http://192.168.0.98"
+        oneRing.rules.directory = "${userHome}/.OneRing/rules"
     }
     development {
         grails.serverURL = "http://localhost:8080/${appName}"
+        oneRing.rules.directory = "${userHome}/.OneRing/rules"
     }
     test {
         grails.serverURL = "http://localhost:8080/${appName}"

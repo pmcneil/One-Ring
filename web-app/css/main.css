@@ -153,6 +153,7 @@ div.errors {
     color: #cc0000;
     margin: 10px 0 5px 0;
     padding: 5px 0 5px 0;
+    white-space: pre-wrap;
 }
 
 div.errors ul {

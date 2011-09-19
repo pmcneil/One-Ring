@@ -18,6 +18,7 @@ import grails.converters.XML
 
 class RulesEngineService {
 
+    def ruleSetService
     static transactional = false
     static final expose = ['cxf']
     static exclude = ["fireRules", "parseXmlFacts", "getXMLFacts"]
@@ -38,8 +39,7 @@ class RulesEngineService {
     }
 
     List fireRules(String ruleSet, def facts) {
-        RulesEngine engine = new RulesEngine()
-        engine.process(ruleSet, facts)
+        RulesEngine.process(ruleSetService.getRuleSet(ruleSet), facts)
         return facts
     }
 

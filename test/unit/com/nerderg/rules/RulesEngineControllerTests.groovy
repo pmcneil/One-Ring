@@ -27,7 +27,7 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
     void testFireJson1() {
         mockLogging(RulesEngineService, true)
         mockLogging(RulesEngine, true)
-        def ruleSet = new RuleSet(name: "Means Test", ruleSet: """
+        def ruleSet =  """
         ruleset("Means Test") {
             require(['income', 'expenses'])
             rule("nett income") {
@@ -46,9 +46,15 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
                 incomeTest 'passed'
                 nett_income 399
             }
-        }""")
-        mockDomain(RuleSet, [ruleSet])
+        }"""
+
+        def rssControl = mockFor(RuleSetService)
+        rssControl.demand.getRuleSet(1..1) { String name ->
+            def rulesets = RulesEngine.processRules(ruleSet)
+            return rulesets[0]
+        }
         controller.rulesEngineService = new RulesEngineService()
+        controller.rulesEngineService.ruleSetService = rssControl.createMock()
         controller.params.ruleSet = "Means Test"
         controller.params.facts = "[{id: 1, income: 900, expenses: 501},{id: 2, income: 2000, expenses: 600}]"
         controller.fire()
@@ -61,7 +67,7 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
     void testFireJson2() {
         mockLogging(RulesEngineService, true)
         mockLogging(RulesEngine, true)
-        def ruleSet = new RuleSet(name: "Means Test", ruleSet: """ruleset("Means Test") {
+        def ruleSet = """ruleset("Means Test") {
             require(['income', 'expenses'])
             rule("nett income") {
                 when {
@@ -74,9 +80,14 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
                     incomeTest = 'failed'
                 }
             }
-        }""")
-        mockDomain(RuleSet, [ruleSet])
+        }"""
+        def rssControl = mockFor(RuleSetService)
+        rssControl.demand.getRuleSet(1..1) { String name ->
+            def rulesets = RulesEngine.processRules(ruleSet)
+            return rulesets[0]
+        }
         controller.rulesEngineService = new RulesEngineService()
+        controller.rulesEngineService.ruleSetService = rssControl.createMock()
         controller.params.ruleSet = "Means Test"
         controller.params.facts = """[{id: 1, income: lots, expenses: 501},{id: 2, income: 2000, expenses: 600}]"""
         controller.fire()
@@ -88,7 +99,7 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
     void testFireJson3() {
         mockLogging(RulesEngineService, true)
         mockLogging(RulesEngine, true)
-        def ruleSet = new RuleSet(name: "Means Test", ruleSet: """ruleset("Means Test") {
+        def ruleSet = """ruleset("Means Test") {
             require(['income', 'expenses'])
             rule("nett income") {
                 when {
@@ -101,9 +112,14 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
                     incomeTest = 'failed'
                 }
             }
-        }""")
-        mockDomain(RuleSet, [ruleSet])
+        }"""
+        def rssControl = mockFor(RuleSetService)
+        rssControl.demand.getRuleSet(1..1) { String name ->
+            def rulesets = RulesEngine.processRules(ruleSet)
+            return rulesets[0]
+        }
         controller.rulesEngineService = new RulesEngineService()
+        controller.rulesEngineService.ruleSetService = rssControl.createMock()
         controller.params.ruleSet = "Means Test"
         controller.params.facts = """[{id: 1, income: 23heaps, expenses: 501},{id: 2, income: 2000, expenses: 600}]"""
         controller.fire()
@@ -115,7 +131,7 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
     void testFireXml1() {
         mockLogging(RulesEngineService, true)
         mockLogging(RulesEngine, true)
-        def ruleSet = new RuleSet(name: "Means Test", ruleSet: """ruleset("Means Test") {
+        def ruleSet = """ruleset("Means Test") {
             require(['income', 'expenses'])
             rule("nett income") {
                 when {
@@ -133,9 +149,14 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
                 incomeTest 'passed'
                 nett_income 399
             }
-        }""")
-        mockDomain(RuleSet, [ruleSet])
+        }"""
+        def rssControl = mockFor(RuleSetService)
+        rssControl.demand.getRuleSet(1..1) { String name ->
+            def rulesets = RulesEngine.processRules(ruleSet)
+            return rulesets[0]
+        }
         controller.rulesEngineService = new RulesEngineService()
+        controller.rulesEngineService.ruleSetService = rssControl.createMock()
         controller.params.ruleSet = "Means Test"
         controller.params.facts = """<list><map><entry key="income">900</entry><entry key="expenses">300</entry></map></list>"""
         controller.fire()
@@ -147,7 +168,7 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
     void testFireXml2() {
         mockLogging(RulesEngineService, true)
         mockLogging(RulesEngine, true)
-        def ruleSet = new RuleSet(name: "Means Test", ruleSet: """ruleset("Means Test") {
+        def ruleSet = """ruleset("Means Test") {
             require(['income', 'expenses'])
             rule("nett income") {
                 when {
@@ -160,9 +181,14 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
                     incomeTest = 'failed'
                 }
             }
-        }""")
-        mockDomain(RuleSet, [ruleSet])
+        }"""
+        def rssControl = mockFor(RuleSetService)
+        rssControl.demand.getRuleSet(1..1) { String name ->
+            def rulesets = RulesEngine.processRules(ruleSet)
+            return rulesets[0]
+        }
         controller.rulesEngineService = new RulesEngineService()
+        controller.rulesEngineService.ruleSetService = rssControl.createMock()
         controller.params.ruleSet = "Means Test"
         controller.params.facts = """<list><map><entry key="income">lots</entry><entry key="expenses">300</entry></map></list>"""
         controller.fire()
@@ -174,7 +200,7 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
     void testFireXml3() {
         mockLogging(RulesEngineService, true)
         mockLogging(RulesEngine, true)
-        def ruleSet = new RuleSet(name: "Means Test", ruleSet: """ruleset("Means Test") {
+        def ruleSet = """ruleset("Means Test") {
             require(['income', 'expenses'])
             rule("nett income") {
                 when {
@@ -187,9 +213,14 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
                     incomeTest = 'failed'
                 }
             }
-        }""")
-        mockDomain(RuleSet, [ruleSet])
+        }"""
+        def rssControl = mockFor(RuleSetService)
+        rssControl.demand.getRuleSet(1..1) { String name ->
+            def rulesets = RulesEngine.processRules(ruleSet)
+            return rulesets[0]
+        }
         controller.rulesEngineService = new RulesEngineService()
+        controller.rulesEngineService.ruleSetService = rssControl.createMock()
         controller.params.ruleSet = "Means Test"
         controller.params.facts = """<list><map><entry key="income">23heaps</entry><entry key="expenses">300</entry></map></list>"""
         controller.fire()

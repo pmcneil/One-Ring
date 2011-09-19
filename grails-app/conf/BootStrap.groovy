@@ -12,14 +12,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import com.nerderg.rules.RuleSet
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class BootStrap {
 
+    def ruleSetService
+
     def init = { servletContext ->
-        def rs = RuleSet.findByName("Means Test")
-        if (!rs) {
-            new RuleSet(name: "Means Test", ruleSet: """ruleset("Means Test") {
+        File rulesDir = new File(ConfigurationHolder.config.oneRing.rules.directory as String)
+        if (!rulesDir.exists()) {
+            rulesDir.mkdirs()
+            File meansTest = new File(rulesDir,"Means Test.ruleset")
+            meansTest.setText("""ruleset("Means Test") {
     require(['income', 'expenses'])
     rule("nett income") {
         when {
@@ -52,9 +56,10 @@ class BootStrap {
         incomeTest 'passed'
         nett_income 399
     }
-}""").save()
-            new RuleSet(name: "Questions",
-                    ruleSet: """ruleset("Questions") {
+}""")
+
+            File questions = new File(rulesDir,"Questions.ruleset")
+            questions.setText("""ruleset("Questions") {
 
     require(['code'])
 
@@ -68,9 +73,12 @@ class BootStrap {
     test(code: '428605') {question 'supersize that coke for ya?'}
     test(code: '428607') {question null}
 }
-""").save()
+""")
         }
+
+        ruleSetService.update()
     }
+
     def destroy = {
     }
 }

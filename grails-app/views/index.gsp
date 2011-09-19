@@ -7,7 +7,7 @@
 
 <body>
 <div class="nav">
-    <span class="menuButton"><a href="${g.createLink(controller: 'ruleSet', action: 'index')}">Edit Rules</a></span>
+    <span class="menuButton"><a href="${g.createLink(controller: 'ruleSet', action: 'index')}">Rules</a></span>
     <span class="menuButton"><a href="${g.resource(dir: 'rest/applyRules')}">REST</a></span>
     <span class="menuButton"><a href="${g.resource(dir: 'services')}">SOAP</a></span>
 </div>

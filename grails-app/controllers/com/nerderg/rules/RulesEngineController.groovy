@@ -33,7 +33,17 @@ class RulesEngineController {
         //ok text/html form perhaps. Now we need to work out if the facts are encoded XML or JSON
         log.debug "fire params $params"
         def ruleSet = params.ruleSet
+        if(!ruleSet) {
+            log.error "No rule set supplied"
+            response.status = 400
+            return render("Error: No rule set supplied")
+        }
         def facts = params.facts
+        if(!facts) {
+            log.error "No facts supplied"
+            response.status = 400
+            return render("Error: No facts supplied")
+        }
         try {
             boolean xml = facts?.trim()?.startsWith("<")
             def theFacts = xml ? rulesEngineService.parseXmlFacts(facts) : JSON.parse(facts)
@@ -44,7 +54,6 @@ class RulesEngineController {
             }
         } catch (e) {
             log.error e
-            e.printStackTrace()
             response.status = 500
             render "Error: '$e'"
         }
@@ -75,7 +84,6 @@ class RulesEngineController {
                 return results
             } catch (e) {
                 log.error "Error processing rule $e"
-                e.printStackTrace()
                 response.status = 500
                 return [[error: e.message]]
             }

@@ -43,10 +43,11 @@ class RulesEngine {
         def fails = []
         rules.tests.each { testData ->
             if (rules.checkRequired(testData.input)) {
-                rules.runRules(testData.input)
+                Map copy = new HashMap(testData.input)
+                rules.runRules(copy)
                 testData.expect.each {
-                    if (testData.input[it.key] != it.value) {
-                        fails.add("expected '${it.key}' to be '${it.value}' in test data ${testData.input}")
+                    if (copy[it.key] != it.value) {
+                        fails.add("expected '${it.key}' to be '${it.value}' in test data ${copy}")
                     }
                 }
             } else {

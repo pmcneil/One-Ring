@@ -42,9 +42,8 @@ class RulesetDelegate {
     }
 
     def rule(String name, Closure cl) {
-        cl.delegate = new RuleDelegate(name: name)
+        cl.delegate = new com.nerderg.rules.RuleDelegate(name: name)
         cl.resolveStrategy = Closure.DELEGATE_FIRST
-//        println "ruleSet ${this.name} rule $name created"
         rules.add(cl)
     }
 
@@ -65,12 +64,12 @@ class RulesetDelegate {
 
     def test(Map map, Closure testClosure) {
         Map expect = [:]
-        tests.add([input: map, expect: expect])
-        def delegate = new TestDelegate()
+        def delegate = new com.nerderg.rules.TestDelegate()
         delegate.metaClass.methodMissing = {String methodName, args ->
             expect.put(methodName, args[0])
         }
         testClosure.delegate = delegate
         testClosure()
+        tests.add([input: Collections.unmodifiableMap(map), expect: Collections.unmodifiableMap(expect)])
     }
 }

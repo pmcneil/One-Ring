@@ -2,17 +2,32 @@ package com.nerderg.rules
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import groovy.io.FileType
+import javax.naming.Context
+import javax.naming.InitialContext
 
 class RuleSetService {
 
     static transactional = false
     private HashMap<String, RulesetDelegate> ruleSets = [:]
     private HashMap<String, Date> ruleSetTimeStamps = [:]
-    private def ruleLock
+
+    RuleSetService() {
+        try {
+            Context initContext = new InitialContext()
+            Context envContext = initContext.lookup("java:comp/env")
+            String rulesDirectory = envContext.lookup("rulesDirectory")
+            if (rulesDirectory) {
+                println "Overriding rulesDirectory from context env (e.g. tomcat context.xml): $rulesDirectory"
+                ConfigurationHolder.config.oneRing.rules.directory = rulesDirectory
+            }
+        } catch (e) {
+            println "rulesDirectory from environemnt context not set $e"
+        }
+    }
 
     def update() {
         //just replace the referenced map
-        ruleSets = (HashMap)readRules()
+        ruleSets = (HashMap) readRules()
     }
 
     private Map<String, RulesetDelegate> readRules() {
@@ -35,7 +50,7 @@ class RuleSetService {
             log.debug "processed rule sets in " + (System.currentTimeMillis() - startProcess) + "ms"
             ruleSetDelegates.each { ruleSet ->
                 List<String> fails = RulesEngine.testRuleset(ruleSet)
-                if(fails.size() > 0) {
+                if (fails.size() > 0) {
                     throw new Exception("Ruleset $ruleSet.name failed tests\n" + fails.join(',\n'))
                 }
                 ruleSets.put(ruleSet.name, ruleSet)

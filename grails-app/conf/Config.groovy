@@ -22,7 +22,7 @@ if (System.getProperty(ENV_NAME)) {
 } else if (System.getenv(ENV_NAME)) {
     println "Including configuration file specified in environment: " + System.getenv(ENV_NAME);
     grails.config.locations << "file:" + System.getenv(ENV_NAME)
-} else  {
+} else {
     println "No external configuration file defined."
 }
 
@@ -67,7 +67,6 @@ grails.logging.jul.usebridge = true
 grails.spring.bean.packages = []
 
 grails.gorm.failOnError = true
-
 
 // set per-environment serverURL stem for creating absolute links
 environments {

@@ -23,27 +23,27 @@ Features
 
 Changes 20th October 2011
 
-    One Ring has undergone quite a change. I have ripped out the online editing of rules, instead ruleSet files are
-    added to a directory (default ~/.OneRing/rules) which are read and parsed on startup and cached in memory (hashmap).
-    when a rule is called via the REST or SOAP interface the rules are pulled from the hashmap and run. The rules
-    remain the same until update is triggered via the web interface link, at which point the rules directory is read
-    and parsed again replacing the hashmap used to get rules. Update is asynchronous so rule requests can still be
-    served with the old rulesets while an update is happening.
+One Ring has undergone quite a change. I have ripped out the online editing of rules, instead ruleSet files are
+added to a directory (default ~/.OneRing/rules) which are read and parsed on startup and cached in memory (hashmap).
+when a rule is called via the REST or SOAP interface the rules are pulled from the hashmap and run. The rules
+remain the same until update is triggered via the web interface link, at which point the rules directory is read
+and parsed again replacing the hashmap used to get rules. Update is asynchronous so rule requests can still be
+served with the old rulesets while an update is happening.
 
-    We also broke out the rules engine into a separate project https://github.com/pmcneil/OneRing-Engine which generates
-    a very small jar that can be used to run tests on the rules inside your IDE.
+We also broke out the rules engine into a separate project https://github.com/pmcneil/OneRing-Engine which generates
+a very small jar that can be used to run tests on the rules inside your IDE.
 
-    This all leads to the ability to use your IDE or any editor to edit the rules and to version control the changes to the
-    rules using any version control system you like. The model I'm employing is to use a DVCS like git or mercurial
-    with my IDE to edit and test the rules then push to a central repository like github/bitbucket or your own. There the
-    rules can be "built" and tested using a continuous integration server like Jenkins or Bamboo, they can also be pulled
-    down to a test One Ring server to use in your test environment before pushing to production. Once happy that the rules
-    both pass tests and do what you want, you can pull them down to the production server and then at a time that suits you
-    simply update the production server.
+This all leads to the ability to use your IDE or any editor to edit the rules and to version control the changes to the
+rules using any version control system you like. The model I'm employing is to use a DVCS like git or mercurial
+with my IDE to edit and test the rules then push to a central repository like github/bitbucket or your own. There the
+rules can be "built" and tested using a continuous integration server like Jenkins or Bamboo, they can also be pulled
+down to a test One Ring server to use in your test environment before pushing to production. Once happy that the rules
+both pass tests and do what you want, you can pull them down to the production server and then at a time that suits you
+simply update the production server.
 
-    Depending on your use-case you should be able to happily update the production server while it's being used since prior
-    requests will continue to use the old rules until a new ruleSet is requested. Note there is *no* multiple ruleset
-    transaction idea here, so if you rely on multiple rulesets in a row to run as a set, beware.
+Depending on your use-case you should be able to happily update the production server while it's being used since prior
+requests will continue to use the old rules until a new ruleSet is requested. Note there is *no* multiple ruleset
+transaction idea here, so if you rely on multiple rulesets in a row to run as a set, beware.
 
 One Ring is Copyright 2010, 2011 Peter McNeil. It was developed in association with Legal Aid Commission (ACT) as
 part of their eGrants project. Legal Aid Commission (ACT) has graciously allowed me to open source this code under

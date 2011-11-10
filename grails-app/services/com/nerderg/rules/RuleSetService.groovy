@@ -35,6 +35,7 @@ class RuleSetService {
         HashMap<String, RulesetDelegate> ruleSets = [:]
         StringBuffer ruleSetStrings = new StringBuffer()
         def nameMatch = ~/.*\.ruleset/
+        log.info "Rules directory is ${ConfigurationHolder.config.oneRing.rules.directory}"
         File dir = new File(ConfigurationHolder.config.oneRing.rules.directory as String)
         if (dir.exists() && dir.isDirectory()) {
             long startProcess = System.currentTimeMillis()

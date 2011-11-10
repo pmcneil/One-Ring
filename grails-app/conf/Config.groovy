@@ -68,22 +68,6 @@ grails.spring.bean.packages = []
 
 grails.gorm.failOnError = true
 
-// set per-environment serverURL stem for creating absolute links
-environments {
-    production {
-        grails.serverURL = "http://192.168.0.98"
-        oneRing.rules.directory = "${userHome}/.OneRing/rules"
-    }
-    development {
-        grails.serverURL = "http://localhost:8080/${appName}"
-        oneRing.rules.directory = "${userHome}/.OneRing/rules"
-    }
-    test {
-        grails.serverURL = "http://localhost:8080/${appName}"
-    }
-
-}
-
 // log4j configuration
 log4j = {
     // Example of changing the log pattern for the default console
@@ -106,6 +90,30 @@ log4j = {
             'net.sf.ehcache.hibernate'
 
     warn 'org.mortbay.log'
-    debug 'stdout, file',
-            'grails.app'
+}
+environments {
+    production {
+        grails.serverURL = "http://127.0.0.1"
+        oneRing.rules.directory = "${userHome}/.OneRing/rules"
+        log4j = {
+            info 'stdout, file',
+                    'grails.app'
+        }
+    }
+    development {
+        grails.serverURL = "http://localhost:8080/${appName}"
+        oneRing.rules.directory = "${userHome}/.OneRing/rules"
+        log4j = {
+            debug 'stdout, file',
+                    'grails.app'
+        }
+    }
+    test {
+        grails.serverURL = "http://localhost:8080/${appName}"
+        oneRing.rules.directory = "${userHome}/.OneRing/rules"
+        log4j = {
+            debug 'stdout, file',
+                    'grails.app'
+        }
+    }
 }

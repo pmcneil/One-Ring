@@ -13,16 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 class BootStrap {
 
     def ruleSetService
 
     def init = { servletContext ->
+        JSONObject.NULL.metaClass.asBoolean = { return false }
         File rulesDir = new File(ConfigurationHolder.config.oneRing.rules.directory as String)
         if (!rulesDir.exists()) {
             rulesDir.mkdirs()
-            File meansTest = new File(rulesDir,"Means Test.ruleset")
+            File meansTest = new File(rulesDir, "Means Test.ruleset")
             meansTest.setText("""ruleset("Means Test") {
     require(['income', 'expenses'])
     rule("nett income") {
@@ -58,7 +60,7 @@ class BootStrap {
     }
 }""")
 
-            File questions = new File(rulesDir,"Questions.ruleset")
+            File questions = new File(rulesDir, "Questions.ruleset")
             questions.setText("""ruleset("Questions") {
 
     require(['code'])

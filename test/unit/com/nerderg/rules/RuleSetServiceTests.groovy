@@ -74,7 +74,7 @@ class RuleSetServiceTests extends GrailsUnitTestCase {
         assert ruleSet.name == "Means Test"
         assert ruleSet.rules.size() == 3
         assert ruleSet.required == ['income', 'expenses']
-        assert ruleSet.tests == [[input: [income: 900, expenses: 501], expect: [incomeTest: 'passed', nett_income: 399]]]
+        assert ruleSet.tests[0].input == [income: 900, expenses: 501]
 
         long start = System.currentTimeMillis()
         ruleSetService.getRuleSetNames().each { name ->

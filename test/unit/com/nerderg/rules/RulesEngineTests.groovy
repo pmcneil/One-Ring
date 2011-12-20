@@ -36,7 +36,7 @@ class RulesEngineTests extends GrailsUnitTestCase {
         assert ruleSets[0].name == "Means Test"
         assert ruleSets[0].rules.size() == 3
         assert ruleSets[0].required == ['income', 'expenses']
-        assert ruleSets[0].tests == [[input: [income: 900, expenses: 501], expect: [incomeTest: 'passed', nett_income: 399]]]
+        assert ruleSets[0].tests[0].input == [income: 900, expenses: 501]
         ruleSets.each { ruleSet ->
             List fails = RulesEngine.testRuleset(ruleSet)
             assert fails.isEmpty()
@@ -271,7 +271,7 @@ ruleset("milkshake") {
 
         List<String> fails = RulesEngine.testRuleset(ruleSet)
         assert !fails.empty
-        assert fails[0].startsWith("expected 'incomeTest' to be 'passed' in test data")//[income:900, expenses:500, nett_income:400, incomeTest:failed]"
+        assert fails[0].startsWith("assert facts[name]")
 
         ruleDsl = """ruleset("Means Test") {
             require(['income', 'expenses'])
@@ -328,14 +328,36 @@ ruleset("milkshake") {
                 message (["invalid quantity"])
             }
         }
+        ruleset('checkRef') {
+            require(['ref'])
+            rule('should be able to reference map in ref')  {
+                when {
+                    ref.value == 23
+                }
+                then {
+                    ref.yes = true
+                }
+                otherwise {
+                    ref.yes = false
+                }
+            }
+
+            test(ref: [value: 23]) {
+                ref([value: 23,yes: true])
+            }
+            test(ref: [value: 2]) {
+                ref([value: 2, yes: false])
+            }
+    }
         """
         ruleSets = RulesEngine.processRules(ruleDsl)
         assert ruleSets
-        assert ruleSets.size() == 1
-        ruleSet = ruleSets[0]
+        assert ruleSets.size() == 2
 
-        fails = RulesEngine.testRuleset(ruleSet)
-        assert fails.empty
+        ruleSets.each { rs ->
+            fails = RulesEngine.testRuleset(rs)
+            assert fails.empty
+        }
     }
 
 
@@ -388,6 +410,6 @@ ruleset("milkshake") {
         1000.times {
             ruleSet.runRules(fact)
         }
-        println "Rules run 1000 times in avg " + (System.currentTimeMillis() - start)/1000 + "ms each"
+        println "Rules run 1000 times in avg " + (System.currentTimeMillis() - start) / 1000 + "ms each"
     }
 }

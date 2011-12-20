@@ -21,6 +21,18 @@ Features
     * Script rules in simplified or not so simplified Groovy
     * Keepin' it simple
 
+Changes 20th December 2011
+
+Made JSONObject.NULL fail a groovy truth test so that tests like if(blah) work as expected
+References to maps within maps will now work so you can test S1.names.firstName == "Peter"
+Improved the test error reporting
+Test closures can now contain plain old groovy code so you can do things like:
+
+test(name: [firstName:'Peter', secondName: 'McNeil') {
+  println fact.name.firstName.class //for debugging
+  assert fact.name.firstName == 'peter'
+}
+
 Changes 20th October 2011
 
 One Ring has undergone quite a change. I have ripped out the online editing of rules, instead ruleSet files are

@@ -121,11 +121,11 @@ class RulesEngineController {
             if (!v.equals(null)) {
                 if (v instanceof Collection) {
                     collect.add(cleanUpJSONNullCollection(v))
-                }
-                if (v instanceof Map) {
+                } else if (v instanceof Map) {
                     collect.add(cleanUpJSONNullMap(v))
+                } else {
+                    collect.add(v)
                 }
-                collect.add(v)
             }
         }
         return collect

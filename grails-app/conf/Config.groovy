@@ -117,3 +117,6 @@ environments {
         }
     }
 }
+
+grails.converters.default.circular.reference.behaviour = "DEFAULT"
+grails.converters.xml.default.deep = true

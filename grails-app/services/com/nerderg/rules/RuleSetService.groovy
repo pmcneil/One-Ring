@@ -46,6 +46,8 @@ class RuleSetService {
                 }
             }
             log.debug "read files in " + (System.currentTimeMillis() - startProcess) + "ms"
+            File tmpOut = new File("/tmp/rules.groovy")
+            tmpOut.write(ruleSetStrings.toString())
             startProcess = System.currentTimeMillis()
             List<RulesetDelegate> ruleSetDelegates = RulesEngine.processRules(ruleSetStrings.toString())
             log.debug "processed rule sets in " + (System.currentTimeMillis() - startProcess) + "ms"

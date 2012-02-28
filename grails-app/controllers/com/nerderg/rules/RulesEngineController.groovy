@@ -13,8 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 package com.nerderg.rules
 
-import grails.converters.deep.JSON
+import grails.converters.JSON
 import grails.converters.XML
+import org.codehaus.groovy.grails.web.json.JSONObject
+import sun.security.provider.certpath.CollectionCertStore
 
 class RulesEngineController {
 
@@ -33,13 +35,13 @@ class RulesEngineController {
         //ok text/html form perhaps. Now we need to work out if the facts are encoded XML or JSON
         log.debug "fire params $params"
         def ruleSet = params.ruleSet
-        if(!ruleSet) {
+        if (!ruleSet) {
             log.error "No rule set supplied"
             response.status = 400
             return render("Error: No rule set supplied")
         }
         def facts = params.facts
-        if(!facts) {
+        if (!facts) {
             log.error "No facts supplied"
             response.status = 400
             return render("Error: No facts supplied")
@@ -63,8 +65,9 @@ class RulesEngineController {
         def json = request.JSON
         log.debug "fire JSON params $request.JSON"
         def ruleSet = json.ruleSet
-        def facts = json.facts
+        def facts = cleanUpJSONNullCollection(json.facts)
         def res = fireRules(ruleSet, facts)
+        println "about to render ${res as JSON}"
         render res as JSON
     }
 
@@ -83,7 +86,10 @@ class RulesEngineController {
                 log.debug "render json $results"
                 return results
             } catch (e) {
-                log.error "Error processing rule $e"
+                int lineNumber = e.stackTrace.find {
+                    it.fileName == 'Script1.groovy'
+                }?.lineNumber
+                log.error "Error processing rule $ruleSet -> $e line $lineNumber"
                 response.status = 500
                 return [[error: e.message]]
             }
@@ -94,5 +100,34 @@ class RulesEngineController {
             return [[error: msg]]
         }
 
+    }
+
+    private Map cleanUpJSONNullMap(Map m) {
+        m.each {
+            if (it.value.equals(null)) {
+                it.value = null
+            } else if (it.value instanceof Map) {
+                it.value = cleanUpJSONNullMap(it.value)
+            } else if (it.value instanceof Collection) {
+                it.value = cleanUpJSONNullCollection(it.value)
+            }
+        }
+    }
+
+    private Collection cleanUpJSONNullCollection(Collection c) {
+        //create a new collection sans JSONObject.Null objects
+        List collect = []
+        c.each { v ->
+            if (!v.equals(null)) {
+                if (v instanceof Collection) {
+                    collect.add(cleanUpJSONNullCollection(v))
+                }
+                if (v instanceof Map) {
+                    collect.add(cleanUpJSONNullMap(v))
+                }
+                collect.add(v)
+            }
+        }
+        return collect
     }
 }

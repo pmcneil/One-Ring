@@ -15,8 +15,6 @@ package com.nerderg.rules
 
 import grails.converters.JSON
 import grails.converters.XML
-import org.codehaus.groovy.grails.web.json.JSONObject
-import sun.security.provider.certpath.CollectionCertStore
 
 class RulesEngineController {
 

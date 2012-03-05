@@ -21,6 +21,11 @@ Features
     * Script rules in simplified or not so simplified Groovy
     * Keepin' it simple
 
+Changes 5th March 2012
+
+We now scrub JSONObject.Null values from incoming facts and convert to a null because of all the problems JSONObject.Null
+causes.
+
 Changes 20th December 2011
 
 Made JSONObject.NULL fail a groovy truth test so that tests like if(blah) work as expected

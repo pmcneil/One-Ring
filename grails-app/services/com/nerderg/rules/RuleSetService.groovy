@@ -1,12 +1,12 @@
 package com.nerderg.rules
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import groovy.io.FileType
 import javax.naming.Context
 import javax.naming.InitialContext
 
 class RuleSetService {
 
+    def grailsApplication
     static transactional = false
     private HashMap<String, RulesetDelegate> ruleSets = [:]
     private HashMap<String, Date> ruleSetTimeStamps = [:]
@@ -18,10 +18,10 @@ class RuleSetService {
             String rulesDirectory = envContext.lookup("rulesDirectory")
             if (rulesDirectory) {
                 println "Overriding rulesDirectory from context env (e.g. tomcat context.xml): $rulesDirectory"
-                ConfigurationHolder.config.oneRing.rules.directory = rulesDirectory
+                grailsApplication.config.oneRing.rules.directory = rulesDirectory
             }
         } catch (e) {
-            println "rulesDirectory from environemnt context not set $e"
+            println "rulesDirectory from environment context not set $e"
         }
     }
 
@@ -35,8 +35,8 @@ class RuleSetService {
         HashMap<String, RulesetDelegate> ruleSets = [:]
         StringBuffer ruleSetStrings = new StringBuffer()
         def nameMatch = ~/.*\.ruleset/
-        log.info "Rules directory is ${ConfigurationHolder.config.oneRing.rules.directory}"
-        File dir = new File(ConfigurationHolder.config.oneRing.rules.directory as String)
+        log.info "Rules directory is ${grailsApplication.config.oneRing.rules.directory}"
+        File dir = new File(grailsApplication.config.oneRing.rules.directory as String)
         if (dir.exists() && dir.isDirectory()) {
             long startProcess = System.currentTimeMillis()
             dir.eachFileRecurse(FileType.FILES) { File ruleFile ->

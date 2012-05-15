@@ -15,7 +15,6 @@ package com.nerderg.rules
 
 import grails.converters.deep.JSON
 import grails.converters.XML
-import com.nerder.rules.RulesetNotFoundException
 
 class RulesEngineService {
 
@@ -41,9 +40,10 @@ class RulesEngineService {
 
     List fireRules(String ruleSet, def facts) {
         RulesetDelegate ruleSetDelegate = ruleSetService.getRuleSet(ruleSet)
-        if(!ruleSetDelegate) {
+        if (!ruleSetDelegate) {
             throw new RulesetNotFoundException("Ruleset '$ruleSet' not found")
         }
+        ruleSetDelegate.rulesEngineService = this
         RulesEngine.process(ruleSetDelegate, facts)
         return facts
     }

@@ -9,9 +9,8 @@ class RuleSetServiceTests extends GrailsUnitTestCase {
         super.setUp()
         mockLogging(RuleSetService, true)
         mockLogging(RulesEngine, true)
-        def mockConfig = new ConfigObject()
-        mockConfig.oneRing.rules.directory = 'test/unit/com/nerderg/rules/'
-        ConfigurationHolder.config = mockConfig
+        def grailsApplication = [oneRing: [rules: [directory: 'test/unit/com/nerderg/rules/']]]
+
         def dslScript = """ {
             require(['income', 'expenses'])
             rule("nett income") {
@@ -66,7 +65,7 @@ class RuleSetServiceTests extends GrailsUnitTestCase {
     }
 
     void testUpdate() {
-        RuleSetService ruleSetService = new RuleSetService()
+        RuleSetService ruleSetService = new RuleSetService(grailsApplication: [config: [oneRing: [rules: [directory: 'test/unit/com/nerderg/rules/']]]])
         ruleSetService.update()
         assert ruleSetService.size() == 1004
         RulesetDelegate ruleSet = ruleSetService.getRuleSet("Means Test")

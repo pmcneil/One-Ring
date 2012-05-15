@@ -239,6 +239,49 @@ ruleset("milkshake") {
         assert !fact.containsKey('incomeTest3')
     }
 
+    void testRuleCall() {
+        String dslScript = """
+ruleset("callee"){
+    require(['a', 'b'])
+    rule("call div"){
+        when {
+            b != 0
+        }
+        then {
+            callRuleset("divide")
+        }
+        otherwise {
+            result = 'Divide by zero'
+        }
+    }
+}
+
+ruleset("divide"){
+    require(['a', 'b'])
+    rule("div"){
+        evaluate {
+        println "\$a / \$b"
+            result = a / b
+        }
+    }
+}
+"""
+        Map<String, RulesetDelegate> ruleSets = RulesEngine.processRules(dslScript).groupBy { it.name }
+        assert ruleSets
+        assert ruleSets.size() == 2
+        RulesEngineService rulesEngineService = new RulesEngineService(ruleSetService: [getRuleSet: {name -> ruleSets[name].first()}])
+
+        def fact = [a: 12, b: 4]
+
+        rulesEngineService.fireRules('callee', [fact])
+        assert fact.result == 3
+
+        fact = [a: 12, b: 0]
+        rulesEngineService.fireRules('callee', [fact])
+        assert fact.result == 'Divide by zero'
+
+    }
+
     void testTestRulesDsl() {
         mockLogging(RulesEngine, true)
         mockLogging(RulesetDelegate, true)
@@ -271,7 +314,7 @@ ruleset("milkshake") {
 
         List<String> fails = RulesEngine.testRuleset(ruleSet)
         assert !fails.empty
-        assert fails[0].startsWith("assert facts[name]")
+        assert fails[0].startsWith("Test 1\nassert fact[name]")
 
         ruleDsl = """ruleset("Means Test") {
             require(['income', 'expenses'])

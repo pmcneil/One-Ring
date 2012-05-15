@@ -21,6 +21,35 @@ Features
     * Script rules in simplified or not so simplified Groovy
     * Keepin' it simple
 
+Changes 15th May 2012
+
+Added a "callRuleset" function to rules that lets you call another Ruleset from a rule like so:
+
+ruleset("caller"){
+    require(['a', 'b'])
+    rule("call div"){
+        when {
+            b != 0
+        }
+        then {
+            callRuleset("divide")
+        }
+        otherwise {
+            result = 'Divide by zero'
+        }
+    }
+}
+
+ruleset("divide"){
+    require(['a', 'b'])
+    rule("div"){
+        evaluate {
+        println "$a / $b"
+            result = a / b
+        }
+    }
+}
+
 Changes 5th March 2012
 
 We now scrub JSONObject.Null values from incoming facts and convert to a null because of all the problems JSONObject.Null

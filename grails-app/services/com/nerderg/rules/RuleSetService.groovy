@@ -10,24 +10,30 @@ class RuleSetService {
     static transactional = false
     private HashMap<String, RulesetDelegate> ruleSets = [:]
     private HashMap<String, Date> ruleSetTimeStamps = [:]
-
-    RuleSetService() {
-        try {
-            Context initContext = new InitialContext()
-            Context envContext = initContext.lookup("java:comp/env")
-            String rulesDirectory = envContext.lookup("rulesDirectory")
-            if (rulesDirectory) {
-                println "Overriding rulesDirectory from context env (e.g. tomcat context.xml): $rulesDirectory"
-                grailsApplication.config.oneRing.rules.directory = rulesDirectory
-            }
-        } catch (e) {
-            println "rulesDirectory from environment context not set $e"
-        }
-    }
+    private String rulesDirectory
 
     def update() {
         //just replace the referenced map
         ruleSets = (HashMap) readRules()
+    }
+
+    private String getRulesDir() {
+        if (rulesDirectory) {
+            return rulesDirectory
+        }
+        try {
+            Context initContext = new InitialContext()
+            Context envContext = initContext.lookup("java:comp/env")
+            rulesDirectory = envContext.lookup("rulesDirectory")
+        } catch (e) {
+            println "rulesDirectory from environment context not set $e"
+        }
+        if (rulesDirectory) {
+            println "Overriding rulesDirectory from context env (e.g. tomcat context.xml): $rulesDirectory"
+        } else {
+            rulesDirectory = grailsApplication.config.oneRing.rules.directory
+        }
+        return rulesDirectory
     }
 
     private Map<String, RulesetDelegate> readRules() {
@@ -35,8 +41,8 @@ class RuleSetService {
         HashMap<String, RulesetDelegate> ruleSets = [:]
         StringBuffer ruleSetStrings = new StringBuffer()
         def nameMatch = ~/.*\.ruleset/
-        log.info "Rules directory is ${grailsApplication.config.oneRing.rules.directory}"
-        File dir = new File(grailsApplication.config.oneRing.rules.directory as String)
+        File dir = new File(getRulesDir())
+        log.info "Rules directory is ${dir.absolutePath}"
         if (dir.exists() && dir.isDirectory()) {
             long startProcess = System.currentTimeMillis()
             dir.eachFileRecurse(FileType.FILES) { File ruleFile ->

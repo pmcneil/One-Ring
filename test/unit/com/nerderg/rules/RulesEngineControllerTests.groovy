@@ -90,7 +90,6 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
         controller.rulesEngineService = new RulesEngineService()
         controller.rulesEngineService.ruleSetService = rssControl.createMock()
         controller.params.ruleSet = "Means Test"
-        controller.request.format = "json"
         controller.params.facts = """[{id: 1, income: lots, expenses: 501},{id: 2, income: 2000, expenses: 600}]"""
         controller.fire()
         println controller.response.contentAsString

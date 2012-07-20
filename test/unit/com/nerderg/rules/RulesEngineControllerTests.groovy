@@ -90,6 +90,7 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
         controller.rulesEngineService = new RulesEngineService()
         controller.rulesEngineService.ruleSetService = rssControl.createMock()
         controller.params.ruleSet = "Means Test"
+        controller.request.format = "json"
         controller.params.facts = """[{id: 1, income: lots, expenses: 501},{id: 2, income: 2000, expenses: 600}]"""
         controller.fire()
         println controller.response.contentAsString
@@ -319,6 +320,14 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
                 controller: 'grant'
         ]]
         println map as JSON
+    }
+
+    void testNullCollectionHandling() {
+
+        def facts = """[{id: 1, income: 23heaps, expenses: 501},{id: 2, income: 2000, expenses: 600}, null]"""
+        def list = controller.cleanUpJSONNullCollection(JSON.parse(facts))
+        assert list.get(2) == null
+
     }
 
 }

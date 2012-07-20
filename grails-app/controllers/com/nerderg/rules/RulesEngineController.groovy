@@ -124,6 +124,8 @@ class RulesEngineController {
                 } else {
                     collect.add(v)
                 }
+            } else {
+                collect.add(null)
             }
         }
         return collect

@@ -323,9 +323,10 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
 
     void testNullCollectionHandling() {
 
-        def facts = """[{id: 1, income: 23heaps, expenses: 501},{id: 2, income: 2000, expenses: 600}, null]"""
+        def facts = "[{id: 1, income: 23heaps, expenses: 501},{id: 2, income: 2000, expenses: 600}, null]"
         def list = controller.cleanUpJSONNullCollection(JSON.parse(facts))
-        assert list.get(2) == null
+        assert list.size() == 3
+        assert list[2] == null
 
     }
 

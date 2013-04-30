@@ -38,7 +38,7 @@ class RulesEngineController {
             response.status = 400
             return render("Error: No rule set supplied")
         }
-        def facts = params.facts
+        String facts = params.facts
         if (!facts) {
             log.error "No facts supplied"
             response.status = 400
@@ -84,7 +84,7 @@ class RulesEngineController {
                 log.debug "render json $results"
                 return results
             } catch (e) {
-                int lineNumber = e.stackTrace.find {
+                Integer lineNumber = e.stackTrace.find {
                     it.fileName == 'Script1.groovy'
                 }?.lineNumber
                 log.error "Error processing rule $ruleSet -> $e line $lineNumber"
@@ -105,14 +105,14 @@ class RulesEngineController {
             if (it.value.equals(null)) {
                 it.value = null
             } else if (it.value instanceof Map) {
-                it.value = cleanUpJSONNullMap(it.value)
+                it.value = cleanUpJSONNullMap(it.value as Map)
             } else if (it.value instanceof Collection) {
-                it.value = cleanUpJSONNullCollection(it.value)
+                it.value = cleanUpJSONNullCollection(it.value as Collection)
             }
         }
     }
 
-    private Collection cleanUpJSONNullCollection(Collection c) {
+    protected Collection cleanUpJSONNullCollection(Collection c) {
         //create a new collection sans JSONObject.Null objects
         List collect = []
         c.each { v ->

@@ -324,10 +324,28 @@ class RulesEngineControllerTests extends ControllerUnitTestCase {
     void testNullCollectionHandling() {
 
         def facts = "[{id: 1, income: 23heaps, expenses: 501},{id: 2, income: 2000, expenses: 600}, null]"
-        def list = controller.cleanUpJSONNullCollection(JSON.parse(facts))
+        def list = controller.cleanUpJSONNullCollection(JSON.parse(facts) as Collection)
         assert list.size() == 3
         assert list[2] == null
 
+    }
+
+    void testFireJsonNotFound() {
+        mockLogging(RulesEngineService, true)
+        mockLogging(RulesEngine, true)
+
+        def rssControl = mockFor(RuleSetService)
+        rssControl.demand.getRuleSet(1..1) { String name ->
+            return null
+        }
+        controller.rulesEngineService = new RulesEngineService()
+        controller.rulesEngineService.ruleSetService = rssControl.createMock()
+        controller.params.ruleSet = "Means Toast"
+        controller.params.facts = "[{id: 1, income: 900, expenses: 501},{id: 2, income: 2000, expenses: 600}]"
+        controller.fire()
+        println controller.response.contentAsString
+        def expected = '[{"error":"Ruleset \'Means Toast\' not found"}]'
+        assert controller.response.contentAsString == expected
     }
 
 }

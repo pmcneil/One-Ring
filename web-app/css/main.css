@@ -125,6 +125,12 @@ input:focus, select:focus, textarea:focus {
     padding-left: 25px;
 }
 
+.menuButton a.update {
+    background: url(../images/skin/arrow_refresh.png) center left no-repeat;
+    color: #333;
+    padding-left: 25px;
+}
+
 .menuButton a.list {
     background: url(../images/skin/database_table.png) center left no-repeat;
     color: #333;

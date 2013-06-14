@@ -8,7 +8,7 @@
 <body>
 <div class="nav">
     <span class="menuButton"><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></span>
-  <span class="menuButton"><a class="home" href="${createLink(controller: 'ruleSet', action: 'update')}">Update</a></span>
+  <span class="menuButton"><a class="update" href="${createLink(controller: 'ruleSet', action: 'update')}">Update</a></span>
 </div>
 <div class="body">
     <h1><g:message code="default.list.label" args="[entityName]"/></h1>

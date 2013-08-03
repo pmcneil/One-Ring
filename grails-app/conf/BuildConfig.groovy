@@ -20,5 +20,6 @@ grails.project.dependency.resolution = {
     }
     plugins {
         compile ":cxf:1.1.1"
+        build ":tomcat:$grailsVersion"
     }
 }

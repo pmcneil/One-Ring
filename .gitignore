@@ -11,3 +11,12 @@ web-app/WEB-INF
 plugin.xml
 *.zip
 *.log
+atlassian-ide-plugin.xml
+web-app/css/errors.css
+web-app/css/mobile.css
+web-app/images/apple-touch-icon-retina.png
+web-app/images/apple-touch-icon.png
+web-app/images/favicon.ico
+web-app/images/grails_logo.jpg
+web-app/images/grails_logo.png
+web-app/images/springsource.png

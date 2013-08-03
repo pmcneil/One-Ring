@@ -266,7 +266,7 @@ ruleset("divide"){
     }
 }
 """
-        Map<String, RulesetDelegate> ruleSets = RulesEngine.processRules(dslScript).groupBy { it.name }
+        Map<String, List<RulesetDelegate>> ruleSets = RulesEngine.processRules(dslScript).groupBy { it.name }
         assert ruleSets
         assert ruleSets.size() == 2
         RulesEngineService rulesEngineService = new RulesEngineService(ruleSetService: [getRuleSet: {name -> ruleSets[name].first()}])
@@ -314,7 +314,7 @@ ruleset("divide"){
 
         List<String> fails = RulesEngine.testRuleset(ruleSet)
         assert !fails.empty
-        assert fails[0].startsWith("Test 1\nassert fact[name]")
+        assert fails[0].startsWith("\n-----\nTest 1 failed")
 
         ruleDsl = """ruleset("Means Test") {
             require(['income', 'expenses'])

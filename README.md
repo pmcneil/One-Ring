@@ -1,4 +1,4 @@
-One Ring - Scripting Rules Engine Service
+# One Ring - Scripting Rules Engine Service
 
     One Ring isn't like other "Rules Engines", it's meant to be used as a web service for multiple applications
     to gain access to scripted processing of arbitrary parameters.
@@ -12,7 +12,9 @@ One Ring - Scripting Rules Engine Service
 
     It has not been optimised for speed, it's not fast but it's not exactly slow.
 
-Features
+    See http://nerderg.com/One+Ring for doco and downloads of ready to go files.
+
+## Features
 
     * A friendly to quite a few humans DSL
     * REST and SOAP interfaces
@@ -21,10 +23,15 @@ Features
     * Script rules in simplified or not so simplified Groovy
     * Keepin' it simple
 
-Changes 15th May 2012
+## Changes 28th April 2013
+
+Upgraded to Grails 2.1.1 and upgraded to use the latest rulesEngine.jar
+Removed cruft.
+
+## Changes 15th May 2012
 
 Added a "callRuleset" function to rules that lets you call another Ruleset from a rule like so:
-
+```groovy
 ruleset("caller"){
     require(['a', 'b'])
     rule("call div"){
@@ -49,13 +56,13 @@ ruleset("divide"){
         }
     }
 }
-
-Changes 5th March 2012
+```
+## Changes 5th March 2012
 
 We now scrub JSONObject.Null values from incoming facts and convert to a null because of all the problems JSONObject.Null
 causes.
 
-Changes 20th December 2011
+## Changes 20th December 2011
 
 Made JSONObject.NULL fail a groovy truth test so that tests like if(blah) work as expected
 References to maps within maps will now work so you can test S1.names.firstName == "Peter"
@@ -67,7 +74,7 @@ test(name: [firstName:'Peter', secondName: 'McNeil') {
   assert fact.name.firstName == 'peter'
 }
 
-Changes 20th October 2011
+## Changes 20th October 2011
 
 One Ring has undergone quite a change. I have ripped out the online editing of rules, instead ruleSet files are
 added to a directory (default ~/.OneRing/rules) which are read and parsed on startup and cached in memory (hashmap).

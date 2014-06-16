@@ -93,10 +93,10 @@ log4j = {
 }
 environments {
     production {
-        grails.serverURL = "http://127.0.0.1"
+        grails.serverURL = ""
         oneRing.rules.directory = "${userHome}/.OneRing/rules"
         log4j = {
-            info 'stdout, file',
+            debug 'stdout, file',
                     'grails.app'
         }
     }

@@ -27,7 +27,7 @@ This project has not been updated since 2012 and relies on grails 1.3.x. We are 
 
 # Changes
 
-##Changes 15th May 2012
+## Changes 15th May 2012
 
 Added a "callRuleset" function to rules that lets you call another Ruleset from a rule like so:
 

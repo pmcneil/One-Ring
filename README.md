@@ -1,25 +1,31 @@
-One Ring - Scripting Rules Engine Service
+#One Ring - Scripting Rules Engine Service
 
-    One Ring isn't like other "Rules Engines", it's meant to be used as a web service for multiple applications
-    to gain access to scripted processing of arbitrary parameters.
+One Ring isn't like other "Rules Engines", it's meant to be used as a web service for multiple applications
+to gain access to scripted processing of arbitrary parameters.
 
-    It centralises processing of common rules (or business rules) for multiple applications that need
-    access to the same rules. Rules are defined using a simple language understandable by domain experts.
+It centralises processing of common rules (or business rules) for multiple applications that need
+access to the same rules. Rules are defined using a simple language understandable by domain experts.
 
-    One Ring is aimed at continuous processing for multiple small applications, not batch processing of billions of
-    entities. It is very light weight and is deployed as a WAR inside a container like Tomcat. For processing purposes
-    there is no reason why you can't have multiple One Ring servers running from the same Database.
+One Ring is aimed at continuous processing for multiple small applications, not batch processing of billions of
+entities. It is very light weight and is deployed as a WAR inside a container like Tomcat. For processing purposes
+there is no reason why you can't have multiple One Ring servers running from the same Database.
 
-    It has not been optimised for speed, it's not fast but it's not exactly slow.
+It has not been optimised for speed, it's not fast but it's not exactly slow.
 
-Features
+#Features
 
-    * A friendly to quite a few humans DSL
-    * REST and SOAP interfaces
-    * JSON and XML fact encoding
-    * Inbuilt rule testing in the rule set
-    * Script rules in simplified or not so simplified Groovy
-    * Keepin' it simple
+* A friendly to quite a few humans DSL
+* REST and SOAP interfaces
+* JSON and XML fact encoding
+* Inbuilt rule testing in the rule set
+* Script rules in simplified or not so simplified Groovy
+* Keepin' it simple
+
+#Roadmap
+
+This project has not been updated since 2012 and relies on grails 1.3.x. We are looking at an upgrade path that turns this into a simple REST microservice running on Micronaut (https://micronaut.io/).
+
+#Changes
 
 Changes 15th May 2012
 

@@ -1,4 +1,4 @@
-#One Ring - Scripting Rules Engine Service
+# One Ring - Scripting Rules Engine Service
 
 One Ring isn't like other "Rules Engines", it's meant to be used as a web service for multiple applications
 to gain access to scripted processing of arbitrary parameters.
@@ -12,7 +12,7 @@ there is no reason why you can't have multiple One Ring servers running from the
 
 It has not been optimised for speed, it's not fast but it's not exactly slow.
 
-#Features
+# Features
 
 * A friendly to quite a few humans DSL
 * REST and SOAP interfaces
@@ -21,13 +21,13 @@ It has not been optimised for speed, it's not fast but it's not exactly slow.
 * Script rules in simplified or not so simplified Groovy
 * Keepin' it simple
 
-#Roadmap
+# Roadmap
 
 This project has not been updated since 2012 and relies on grails 1.3.x. We are looking at an upgrade path that turns this into a simple REST microservice running on Micronaut (https://micronaut.io/).
 
-#Changes
+# Changes
 
-Changes 15th May 2012
+##Changes 15th May 2012
 
 Added a "callRuleset" function to rules that lets you call another Ruleset from a rule like so:
 
@@ -56,12 +56,12 @@ ruleset("divide"){
     }
 }
 
-Changes 5th March 2012
+## Changes 5th March 2012
 
 We now scrub JSONObject.Null values from incoming facts and convert to a null because of all the problems JSONObject.Null
 causes.
 
-Changes 20th December 2011
+## Changes 20th December 2011
 
 Made JSONObject.NULL fail a groovy truth test so that tests like if(blah) work as expected
 References to maps within maps will now work so you can test S1.names.firstName == "Peter"
@@ -73,7 +73,7 @@ test(name: [firstName:'Peter', secondName: 'McNeil') {
   assert fact.name.firstName == 'peter'
 }
 
-Changes 20th October 2011
+## Changes 20th October 2011
 
 One Ring has undergone quite a change. I have ripped out the online editing of rules, instead ruleSet files are
 added to a directory (default ~/.OneRing/rules) which are read and parsed on startup and cached in memory (hashmap).
@@ -96,6 +96,8 @@ simply update the production server.
 Depending on your use-case you should be able to happily update the production server while it's being used since prior
 requests will continue to use the old rules until a new ruleSet is requested. Note there is *no* multiple ruleset
 transaction idea here, so if you rely on multiple rulesets in a row to run as a set, beware.
+
+# Notes
 
 One Ring is Copyright 2010, 2011 Peter McNeil. It was developed in association with Legal Aid Commission (ACT) as
 part of their eGrants project. Legal Aid Commission (ACT) has graciously allowed me to open source this code under
